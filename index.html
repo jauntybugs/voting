@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Ballot Voting System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+        @keyframes countUp {
+            from { transform: scale(0.5); }
+            to { transform: scale(1); }
+        }
+        .count-up {
+            animation: countUp 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
+    
+    <!-- View Selection Screen -->
+    <div id="viewSelection" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800">Secret Ballot Voting System</h1>
+                <p class="text-gray-600 mt-2">Board Election 2024</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <button onclick="showView('voter')" class="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-xl transition duration-200 text-center">
+                    <div class="text-3xl mb-3">🗳️</div>
+                    <h3 class="font-semibold text-lg">Voter Portal</h3>
+                    <p class="text-sm opacity-90 mt-1">Cast your votes</p>
+                </button>
+                
+                <button onclick="showView('results')" class="bg-green-600 hover:bg-green-700 text-white p-6 rounded-xl transition duration-200 text-center">
+                    <div class="text-3xl mb-3">📊</div>
+                    <h3 class="font-semibold text-lg">Live Results</h3>
+                    <p class="text-sm opacity-90 mt-1">Public display</p>
+                </button>
+                
+                <button onclick="showView('admin')" class="bg-purple-600 hover:bg-purple-700 text-white p-6 rounded-xl transition duration-200 text-center">
+                    <div class="text-3xl mb-3">⚙️</div>
+                    <h3 class="font-semibold text-lg">Admin Panel</h3>
+                    <p class="text-sm opacity-90 mt-1">Manage system</p>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Voter Login Screen -->
+    <div id="voterLogin" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <button onclick="backToSelection()" class="absolute top-4 left-4 text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Voter Access</h1>
+                <p class="text-gray-600 mt-2">Enter your unique access code</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Access Code</label>
+                    <input type="text" id="accessCode" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your code">
+                </div>
+                <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+                    Access Voting System
+                </button>
+                <div id="loginError" class="text-red-600 text-sm text-center hidden"></div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold text-gray-800 mb-2">Demo Access Codes:</h3>
+                <div class="text-sm text-gray-600 space-y-1" id="demoCodesDisplay">
+                    <div>Loading secure codes...</div>
+                </div>
+                <div class="text-xs text-gray-500 mt-2">
+                    🔒 Codes are randomly generated for security
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voter Interface -->
+    <div id="voterInterface" class="hidden min-h-screen p-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Board Election 2024</h1>
+                        <p class="text-gray-600">Cast your vote anonymously</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <div class="text-sm text-gray-600">Your Progress</div>
+                            <div class="text-lg font-bold text-blue-600" id="voterProgress">0/2 votes cast</div>
+                        </div>
+                        <button onclick="backToSelection()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                            Exit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voting Panel -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Cast Your Votes</h2>
+                    
+                <!-- President Section -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">🏆 President</h3>
+                        <span id="presidentStatus" class="text-sm text-gray-500">Select one candidate</span>
+                    </div>
+                    
+                    <div class="space-y-3" id="presidentCandidates">
+                        <div class="candidate-item border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <span class="text-blue-600 font-semibold">AS</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Alice Smith</h4>
+                                        <p class="text-sm text-gray-600">5 years experience</p>
+                                    </div>
+                                </div>
+                                <button onclick="vote('president', 'alice')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Vote
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="candidate-item border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                                        <span class="text-indigo-600 font-semibold">MR</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Michael Roberts</h4>
+                                        <p class="text-sm text-gray-600">8 years experience</p>
+                                    </div>
+                                </div>
+                                <button onclick="vote('president', 'michael')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Vote
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vice President Section -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">🥈 Vice President</h3>
+                        <span id="vpStatus" class="text-sm text-gray-500">Select one candidate</span>
+                    </div>
+                    
+                    <div class="space-y-3" id="vpCandidates">
+                        <div class="candidate-item border border-gray-200 rounded-lg p-4 hover:border-green-300 transition duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <span class="text-green-600 font-semibold">BJ</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Bob Johnson</h4>
+                                        <p class="text-sm text-gray-600">3 years experience</p>
+                                    </div>
+                                </div>
+                                <button onclick="vote('vp', 'bob')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Vote
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="candidate-item border border-gray-200 rounded-lg p-4 hover:border-green-300 transition duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                                        <span class="text-emerald-600 font-semibold">ST</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Sarah Thompson</h4>
+                                        <p class="text-sm text-gray-600">4 years experience</p>
+                                    </div>
+                                </div>
+                                <button onclick="vote('vp', 'sarah')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Vote
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="candidate-item border border-gray-200 rounded-lg p-4 hover:border-green-300 transition duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
+                                        <span class="text-teal-600 font-semibold">CD</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Carol Davis</h4>
+                                        <p class="text-sm text-gray-600">6 years experience</p>
+                                    </div>
+                                </div>
+                                <button onclick="vote('vp', 'carol')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Vote
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="voteConfirmation" class="hidden mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="text-green-800 font-semibold" id="confirmationMessage">Vote cast successfully!</span>
+                    </div>
+                    <p class="text-green-700 text-sm mt-1" id="confirmationDetails">Your vote has been recorded anonymously.</p>
+                </div>
+
+                <div id="completionMessage" class="hidden mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-blue-800 font-semibold">Voting Complete!</span>
+                    </div>
+                    <p class="text-blue-700 text-sm mt-1">You have successfully cast both your votes. Thank you for participating!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Results Display -->
+    <div id="resultsDisplay" class="hidden min-h-screen p-6 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <button onclick="backToSelection()" class="absolute top-6 left-6 bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition duration-200">
+                    ← Back
+                </button>
+                <h1 class="text-5xl font-bold text-white mb-2">Board Election 2024</h1>
+                <p class="text-xl text-blue-200">Live Results</p>
+                <div class="mt-4 inline-flex items-center space-x-2 bg-white bg-opacity-20 rounded-full px-6 py-2">
+                    <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span class="text-white font-semibold">LIVE</span>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <!-- President Results -->
+                <div class="bg-white bg-opacity-95 rounded-3xl shadow-2xl p-8">
+                    <div class="text-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">🏆 President</h2>
+                        <div class="text-lg text-gray-600">Total Votes: <span class="font-bold text-blue-600" id="presidentTotalVotes">0</span></div>
+                    </div>
+                    
+                    <div class="space-y-6" id="presidentResultsDisplay">
+                        <div class="result-card bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold text-lg">AS</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-800">Alice Smith</h3>
+                                        <p class="text-gray-600">5 years experience</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-blue-600" id="alice-votes-display">0</div>
+                                    <div class="text-sm text-gray-600">votes</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4">
+                                <div class="bg-blue-600 h-4 rounded-full transition-all duration-1000" id="alice-bar-display" style="width: 0%"></div>
+                            </div>
+                            <div class="text-right mt-2">
+                                <span class="text-lg font-semibold text-blue-600" id="alice-percentage">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="result-card bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold text-lg">MR</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-800">Michael Roberts</h3>
+                                        <p class="text-gray-600">8 years experience</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-indigo-600" id="michael-votes-display">0</div>
+                                    <div class="text-sm text-gray-600">votes</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4">
+                                <div class="bg-indigo-600 h-4 rounded-full transition-all duration-1000" id="michael-bar-display" style="width: 0%"></div>
+                            </div>
+                            <div class="text-right mt-2">
+                                <span class="text-lg font-semibold text-indigo-600" id="michael-percentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vice President Results -->
+                <div class="bg-white bg-opacity-95 rounded-3xl shadow-2xl p-8">
+                    <div class="text-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">🥈 Vice President</h2>
+                        <div class="text-lg text-gray-600">Total Votes: <span class="font-bold text-green-600" id="vpTotalVotes">0</span></div>
+                    </div>
+                    
+                    <div class="space-y-4" id="vpResultsDisplay">
+                        <div class="result-card bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold">BJ</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-800">Bob Johnson</h3>
+                                        <p class="text-sm text-gray-600">3 years experience</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-green-600" id="bob-votes-display">0</div>
+                                    <div class="text-xs text-gray-600">votes</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-green-600 h-3 rounded-full transition-all duration-1000" id="bob-bar-display" style="width: 0%"></div>
+                            </div>
+                            <div class="text-right mt-1">
+                                <span class="text-sm font-semibold text-green-600" id="bob-percentage">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="result-card bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold">ST</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-800">Sarah Thompson</h3>
+                                        <p class="text-sm text-gray-600">4 years experience</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-emerald-600" id="sarah-votes-display">0</div>
+                                    <div class="text-xs text-gray-600">votes</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-emerald-600 h-3 rounded-full transition-all duration-1000" id="sarah-bar-display" style="width: 0%"></div>
+                            </div>
+                            <div class="text-right mt-1">
+                                <span class="text-sm font-semibold text-emerald-600" id="sarah-percentage">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="result-card bg-gradient-to-r from-teal-50 to-teal-100 rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold">CD</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-800">Carol Davis</h3>
+                                        <p class="text-sm text-gray-600">6 years experience</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-teal-600" id="carol-votes-display">0</div>
+                                    <div class="text-xs text-gray-600">votes</div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-teal-600 h-3 rounded-full transition-all duration-1000" id="carol-bar-display" style="width: 0%"></div>
+                            </div>
+                            <div class="text-right mt-1">
+                                <span class="text-sm font-semibold text-teal-600" id="carol-percentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Panel -->
+            <div class="bg-white bg-opacity-95 rounded-3xl shadow-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Election Statistics</h2>
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-blue-600 count-up" id="totalVotersDisplay">0</div>
+                        <div class="text-gray-600 font-semibold">Members Voted</div>
+                        <div class="text-sm text-gray-500">of <span id="maxVotersDisplay">10</span> total</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-green-600 count-up" id="totalVotesCastDisplay">0</div>
+                        <div class="text-gray-600 font-semibold">Total Votes</div>
+                        <div class="text-sm text-gray-500">across all positions</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-purple-600 count-up" id="participationRateDisplay">0%</div>
+                        <div class="text-gray-600 font-semibold">Participation</div>
+                        <div class="text-sm text-gray-500">of eligible voters</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-orange-600" id="electionStatus">ACTIVE</div>
+                        <div class="text-gray-600 font-semibold">Status</div>
+                        <div class="text-sm text-gray-500" id="statusMessage">Voting in progress</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Screen -->
+    <div id="adminLogin" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <button onclick="backToSelection()" class="absolute top-4 left-4 text-gray-600 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <div class="bg-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Admin Access</h1>
+                <p class="text-gray-600 mt-2">Enter administrator password</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Admin Password</label>
+                    <input type="password" id="adminPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Enter admin password">
+                </div>
+                <button onclick="adminLogin()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+                    Access Admin Panel
+                </button>
+                <div id="adminLoginError" class="text-red-600 text-sm text-center hidden"></div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-purple-50 rounded-lg">
+                <h3 class="font-semibold text-purple-800 mb-2">🔒 Security Notice</h3>
+                <p class="text-sm text-purple-700">Admin access is protected with a secure password. Only authorized personnel should access this panel.</p>
+                <div class="mt-2 text-xs text-purple-600 bg-purple-100 p-2 rounded">
+                    <strong>Demo Password:</strong> SecureAdmin2024!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="hidden min-h-screen p-4 bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Admin Panel</h1>
+                        <p class="text-gray-600">Manage Election System</p>
+                    </div>
+                    <button onclick="backToSelection()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                        Exit Admin
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Candidate Management -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">Candidate Management</h2>
+                    
+                    <!-- Add New Candidate -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-4">Add New Candidate</h3>
+                        <div class="space-y-3">
+                            <input type="text" id="candidateName" placeholder="Full Name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <select id="candidatePosition" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">Select Position</option>
+                                <option value="president">President</option>
+                                <option value="vp">Vice President</option>
+                            </select>
+                            <input type="text" id="candidateExperience" placeholder="Experience (e.g., 5 years)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <button onclick="addCandidate()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Add Candidate
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Current Candidates -->
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-4">Current Candidates</h3>
+                        <div id="candidatesList" class="space-y-3">
+                            <!-- Candidates will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Controls -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">System Controls</h2>
+                    
+                    <!-- Election Status -->
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3">Election Status</h3>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-gray-700">Current Status:</span>
+                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold" id="adminElectionStatus">ACTIVE</span>
+                        </div>
+                        <div class="space-y-2">
+                            <button onclick="startElection()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Start Election
+                            </button>
+                            <button onclick="pauseElection()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Pause Election
+                            </button>
+                            <button onclick="endElection()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                                End Election
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Voter Management -->
+                    <div class="mb-6 p-4 bg-yellow-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3">Voter Management</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-700">Max Voters:</span>
+                                <input type="number" id="maxVotersInput" value="10" min="1" max="100" class="w-20 px-2 py-1 border border-gray-300 rounded">
+                            </div>
+                            <button onclick="updateMaxVoters()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Update Max Voters
+                            </button>
+                            <button onclick="resetVotes()" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-lg transition duration-200">
+                                Reset All Votes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Generate Access Codes -->
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3">Access Codes</h3>
+                        <button onclick="generateNewCodes()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition duration-200 mb-3">
+                            Generate New Codes
+                        </button>
+                        <div id="generatedCodes" class="text-sm text-gray-600 bg-white p-3 rounded border max-h-32 overflow-y-auto">
+                            <div class="text-center text-gray-500">Click "Generate New Codes" to create secure access codes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Dashboard -->
+            <div class="mt-6 bg-white rounded-2xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Real-time Statistics</h2>
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <div class="text-3xl font-bold text-blue-600" id="adminTotalVoters">0</div>
+                        <div class="text-gray-600 font-semibold">Voters Participated</div>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <div class="text-3xl font-bold text-green-600" id="adminTotalVotes">0</div>
+                        <div class="text-gray-600 font-semibold">Total Votes Cast</div>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <div class="text-3xl font-bold text-purple-600" id="adminParticipation">0%</div>
+                        <div class="text-gray-600 font-semibold">Participation Rate</div>
+                    </div>
+                    <div class="text-center p-4 bg-orange-50 rounded-lg">
+                        <div class="text-3xl font-bold text-orange-600" id="adminUsedCodes">0</div>
+                        <div class="text-gray-600 font-semibold">Codes Used</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // System configuration
+        let MAX_VOTERS = 10;
+        let VALID_CODES = generateRandomCodes(10);
+        let electionActive = true;
+        const ADMIN_PASSWORD = 'SecureAdmin2024!';
+        let adminAuthenticated = false;
+        
+        // Voting state
+        let usedCodes = new Set();
+        let currentUser = null;
+        let userVotes = {
+            president: null,
+            vp: null
+        };
+        let votes = {
+            president: {
+                alice: 0,
+                michael: 0
+            },
+            vp: {
+                bob: 0,
+                sarah: 0,
+                carol: 0
+            }
+        };
+        let totalVotersParticipated = 0;
+        let totalVotesCast = 0;
+        
+        // Generate random secure access codes
+        function generateRandomCodes(count) {
+            const codes = [];
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            
+            for (let i = 0; i < count; i++) {
+                let code = '';
+                // Generate 8-character random code
+                for (let j = 0; j < 8; j++) {
+                    code += characters.charAt(Math.floor(Math.random() * characters.length));
+                }
+                // Ensure uniqueness
+                while (codes.includes(code)) {
+                    code = '';
+                    for (let j = 0; j < 8; j++) {
+                        code += characters.charAt(Math.floor(Math.random() * characters.length));
+                    }
+                }
+                codes.push(code);
+            }
+            return codes;
+        }
+        
+        // Candidate management
+        let candidates = {
+            president: [
+                { id: 'alice', name: 'Alice Smith', experience: '5 years experience' },
+                { id: 'michael', name: 'Michael Roberts', experience: '8 years experience' }
+            ],
+            vp: [
+                { id: 'bob', name: 'Bob Johnson', experience: '3 years experience' },
+                { id: 'sarah', name: 'Sarah Thompson', experience: '4 years experience' },
+                { id: 'carol', name: 'Carol Davis', experience: '6 years experience' }
+            ]
+        };
+
+        // View Management
+        function showView(viewType) {
+            // Hide all views
+            document.getElementById('viewSelection').classList.add('hidden');
+            document.getElementById('voterLogin').classList.add('hidden');
+            document.getElementById('voterInterface').classList.add('hidden');
+            document.getElementById('resultsDisplay').classList.add('hidden');
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+            
+            if (viewType === 'voter') {
+                document.getElementById('voterLogin').classList.remove('hidden');
+            } else if (viewType === 'results') {
+                document.getElementById('resultsDisplay').classList.remove('hidden');
+                updateResultsDisplay();
+                // Auto-refresh results every 2 seconds
+                setInterval(updateResultsDisplay, 2000);
+            } else if (viewType === 'admin') {
+                document.getElementById('adminLogin').classList.remove('hidden');
+            }
+        }
+        
+        function backToSelection() {
+            // Reset user state
+            currentUser = null;
+            userVotes = { president: null, vp: null };
+            
+            // Show selection screen
+            document.getElementById('viewSelection').classList.remove('hidden');
+            document.getElementById('voterLogin').classList.add('hidden');
+            document.getElementById('voterInterface').classList.add('hidden');
+            document.getElementById('resultsDisplay').classList.add('hidden');
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+        }
+
+        // Login function
+        function login() {
+            const code = document.getElementById('accessCode').value.trim().toUpperCase();
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!electionActive) {
+                showError('Election is currently paused or ended');
+                return;
+            }
+            
+            if (!code) {
+                showError('Please enter your access code');
+                return;
+            }
+            
+            if (!VALID_CODES.includes(code)) {
+                showError('Invalid access code');
+                return;
+            }
+            
+            if (usedCodes.has(code)) {
+                showError('This code has already been used');
+                return;
+            }
+            
+            if (totalVotersParticipated >= MAX_VOTERS) {
+                showError('Voting has ended - maximum number of voters reached');
+                return;
+            }
+            
+            // Successful login
+            currentUser = code;
+            usedCodes.add(code);
+            document.getElementById('voterLogin').classList.add('hidden');
+            document.getElementById('voterInterface').classList.remove('hidden');
+            document.getElementById('voterInterface').classList.add('fade-in');
+            
+            updateVoterDisplay();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Admin login function
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('adminLoginError');
+            
+            if (!password) {
+                showAdminError('Please enter the admin password');
+                return;
+            }
+            
+            if (password !== ADMIN_PASSWORD) {
+                showAdminError('Invalid admin password');
+                // Clear password field for security
+                document.getElementById('adminPassword').value = '';
+                return;
+            }
+            
+            // Successful admin login
+            adminAuthenticated = true;
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('fade-in');
+            
+            updateAdminDisplay();
+            updateCandidatesList();
+            
+            // Clear password field
+            document.getElementById('adminPassword').value = '';
+        }
+        
+        function showAdminError(message) {
+            const errorDiv = document.getElementById('adminLoginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Voting function
+        function vote(position, candidate) {
+            if (!electionActive) {
+                alert('Election is currently paused or ended');
+                return;
+            }
+            
+            if (userVotes[position] !== null) {
+                alert(`You have already voted for ${position === 'vp' ? 'Vice President' : 'President'}!`);
+                return;
+            }
+            
+            if (totalVotersParticipated >= MAX_VOTERS) {
+                alert('Voting has ended - maximum number of voters reached');
+                return;
+            }
+            
+            // Record the vote
+            votes[position][candidate]++;
+            userVotes[position] = candidate;
+            totalVotesCast++;
+            
+            // Update status
+            const statusElement = document.getElementById(position === 'vp' ? 'vpStatus' : 'presidentStatus');
+            statusElement.textContent = '✓ Vote cast';
+            statusElement.classList.remove('text-gray-500');
+            statusElement.classList.add('text-green-600', 'font-semibold');
+            
+            // Disable buttons for this position
+            const positionContainer = position === 'president' ? 'presidentCandidates' : 'vpCandidates';
+            const buttons = document.querySelectorAll(`#${positionContainer} button`);
+            buttons.forEach(button => {
+                button.disabled = true;
+                if (button.onclick.toString().includes(candidate)) {
+                    button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-600', 'hover:bg-green-700');
+                    button.classList.add('bg-green-500');
+                    button.textContent = '✓ Voted';
+                } else {
+                    button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-600', 'hover:bg-green-700');
+                    button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    button.textContent = 'Disabled';
+                }
+            });
+            
+            // Show confirmation
+            const confirmationDiv = document.getElementById('voteConfirmation');
+            const messageDiv = document.getElementById('confirmationMessage');
+            const detailsDiv = document.getElementById('confirmationDetails');
+            
+            messageDiv.textContent = `Vote for ${position === 'vp' ? 'Vice President' : 'President'} cast successfully!`;
+            detailsDiv.textContent = `Your vote for ${getCandidateName(candidate)} has been recorded anonymously.`;
+            
+            confirmationDiv.classList.remove('hidden');
+            confirmationDiv.classList.add('fade-in');
+            
+            // Hide confirmation after 3 seconds
+            setTimeout(() => {
+                confirmationDiv.classList.add('hidden');
+            }, 3000);
+            
+            // Check if both votes are cast
+            if (userVotes.president !== null && userVotes.vp !== null) {
+                totalVotersParticipated++;
+                setTimeout(() => {
+                    document.getElementById('completionMessage').classList.remove('hidden');
+                    document.getElementById('completionMessage').classList.add('fade-in');
+                }, 1000);
+            }
+            
+            // Update displays
+            updateVoterDisplay();
+            updateResultsDisplay();
+            updateAdminDisplay();
+            
+            // Add pulse animation to the voted candidate
+            const candidateItems = document.querySelectorAll(`#${positionContainer} .candidate-item`);
+            candidateItems.forEach(item => {
+                const button = item.querySelector('button');
+                if (button && button.onclick.toString().includes(candidate)) {
+                    item.classList.add('pulse-animation');
+                    setTimeout(() => {
+                        item.classList.remove('pulse-animation');
+                    }, 2000);
+                }
+            });
+        }
+        
+        function getCandidateName(candidate) {
+            const names = {
+                alice: 'Alice Smith',
+                michael: 'Michael Roberts',
+                bob: 'Bob Johnson',
+                sarah: 'Sarah Thompson',
+                carol: 'Carol Davis'
+            };
+            return names[candidate] || candidate;
+        }
+
+        // Update voter display
+        function updateVoterDisplay() {
+            const votesCount = (userVotes.president ? 1 : 0) + (userVotes.vp ? 1 : 0);
+            document.getElementById('voterProgress').textContent = `${votesCount}/2 votes cast`;
+        }
+
+        // Update results display
+        function updateResultsDisplay() {
+            // Update President results
+            const presidentTotal = Object.values(votes.president).reduce((sum, count) => sum + count, 0);
+            document.getElementById('presidentTotalVotes').textContent = presidentTotal;
+            
+            Object.keys(votes.president).forEach(candidate => {
+                const voteCount = votes.president[candidate];
+                const percentage = presidentTotal > 0 ? (voteCount / presidentTotal) * 100 : 0;
+                
+                const voteElement = document.getElementById(`${candidate}-votes-display`);
+                const barElement = document.getElementById(`${candidate}-bar-display`);
+                const percentElement = document.getElementById(`${candidate}-percentage`);
+                
+                if (voteElement) voteElement.textContent = voteCount;
+                if (barElement) barElement.style.width = `${percentage}%`;
+                if (percentElement) percentElement.textContent = `${Math.round(percentage)}%`;
+            });
+            
+            // Update VP results
+            const vpTotal = Object.values(votes.vp).reduce((sum, count) => sum + count, 0);
+            document.getElementById('vpTotalVotes').textContent = vpTotal;
+            
+            Object.keys(votes.vp).forEach(candidate => {
+                const voteCount = votes.vp[candidate];
+                const percentage = vpTotal > 0 ? (voteCount / vpTotal) * 100 : 0;
+                
+                const voteElement = document.getElementById(`${candidate}-votes-display`);
+                const barElement = document.getElementById(`${candidate}-bar-display`);
+                const percentElement = document.getElementById(`${candidate}-percentage`);
+                
+                if (voteElement) voteElement.textContent = voteCount;
+                if (barElement) barElement.style.width = `${percentage}%`;
+                if (percentElement) percentElement.textContent = `${Math.round(percentage)}%`;
+            });
+            
+            // Update statistics
+            const participationRate = Math.round((totalVotersParticipated / MAX_VOTERS) * 100);
+            
+            const totalVotersEl = document.getElementById('totalVotersDisplay');
+            const totalVotesEl = document.getElementById('totalVotesCastDisplay');
+            const participationEl = document.getElementById('participationRateDisplay');
+            const statusEl = document.getElementById('electionStatus');
+            const statusMsgEl = document.getElementById('statusMessage');
+            
+            if (totalVotersEl) totalVotersEl.textContent = totalVotersParticipated;
+            if (totalVotesEl) totalVotesEl.textContent = totalVotesCast;
+            if (participationEl) participationEl.textContent = `${participationRate}%`;
+            
+            if (statusEl && statusMsgEl) {
+                if (!electionActive) {
+                    statusEl.textContent = 'PAUSED';
+                    statusMsgEl.textContent = 'Election paused';
+                } else if (totalVotersParticipated >= MAX_VOTERS) {
+                    statusEl.textContent = 'ENDED';
+                    statusMsgEl.textContent = 'Voting complete';
+                } else {
+                    statusEl.textContent = 'ACTIVE';
+                    statusMsgEl.textContent = 'Voting in progress';
+                }
+            }
+        }
+
+        // Admin functions
+        function updateAdminDisplay() {
+            document.getElementById('adminTotalVoters').textContent = totalVotersParticipated;
+            document.getElementById('adminTotalVotes').textContent = totalVotesCast;
+            document.getElementById('adminUsedCodes').textContent = usedCodes.size;
+            
+            const participationRate = Math.round((totalVotersParticipated / MAX_VOTERS) * 100);
+            document.getElementById('adminParticipation').textContent = `${participationRate}%`;
+            
+            const statusEl = document.getElementById('adminElectionStatus');
+            statusEl.textContent = electionActive ? 'ACTIVE' : 'PAUSED';
+            statusEl.className = electionActive ? 
+                'px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold' :
+                'px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold';
+        }
+
+        function addCandidate() {
+            if (!adminAuthenticated) {
+                alert('Admin authentication required');
+                return;
+            }
+            
+            const name = document.getElementById('candidateName').value.trim();
+            const position = document.getElementById('candidatePosition').value;
+            const experience = document.getElementById('candidateExperience').value.trim();
+            
+            if (!name || !position || !experience) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            const id = name.toLowerCase().replace(/\s+/g, '');
+            const candidate = { id, name, experience };
+            
+            candidates[position].push(candidate);
+            votes[position][id] = 0;
+            
+            // Clear form
+            document.getElementById('candidateName').value = '';
+            document.getElementById('candidatePosition').value = '';
+            document.getElementById('candidateExperience').value = '';
+            
+            updateCandidatesList();
+            alert('Candidate added successfully!');
+        }
+
+        function updateCandidatesList() {
+            const container = document.getElementById('candidatesList');
+            container.innerHTML = '';
+            
+            ['president', 'vp'].forEach(position => {
+                const positionTitle = position === 'president' ? 'President' : 'Vice President';
+                const positionDiv = document.createElement('div');
+                positionDiv.className = 'mb-4';
+                positionDiv.innerHTML = `<h4 class="font-semibold text-gray-800 mb-2">${positionTitle}</h4>`;
+                
+                candidates[position].forEach(candidate => {
+                    const candidateDiv = document.createElement('div');
+                    candidateDiv.className = 'flex justify-between items-center p-2 bg-gray-50 rounded mb-2';
+                    candidateDiv.innerHTML = `
+                        <div>
+                            <span class="font-medium">${candidate.name}</span>
+                            <span class="text-sm text-gray-600 ml-2">${candidate.experience}</span>
+                        </div>
+                        <button onclick="removeCandidate('${position}', '${candidate.id}')" class="text-red-600 hover:text-red-800 text-sm">Remove</button>
+                    `;
+                    positionDiv.appendChild(candidateDiv);
+                });
+                
+                container.appendChild(positionDiv);
+            });
+        }
+
+        function removeCandidate(position, candidateId) {
+            candidates[position] = candidates[position].filter(c => c.id !== candidateId);
+            delete votes[position][candidateId];
+            updateCandidatesList();
+        }
+
+        function startElection() {
+            if (!adminAuthenticated) {
+                alert('Admin authentication required');
+                return;
+            }
+            electionActive = true;
+            updateAdminDisplay();
+            alert('Election started!');
+        }
+
+        function pauseElection() {
+            if (!adminAuthenticated) {
+                alert('Admin authentication required');
+                return;
+            }
+            electionActive = false;
+            updateAdminDisplay();
+            alert('Election paused!');
+        }
+
+        function endElection() {
+            if (!adminAuthenticated) {
+                alert('Admin authentication required');
+                return;
+            }
+            electionActive = false;
+            updateAdminDisplay();
+            alert('Election ended!');
+        }
+
+        function updateMaxVoters() {
+            if (!adminAuthenticated) {
+                alert('Admin authentication required');
+                return;
+            }
+            const newMax = parseInt(document.getElementById('maxVotersInput').value);
+            if (newMax > 0 && newMax <= 100) {
+                MAX_VOTERS = newMax;
+                updateAdminDisplay();
+                updateResultsDisplay();
+                alert(`Maximum voters updated to ${newMax}`);
+            } else {
+                alert('Please enter a valid number between 1 and 100');
+            }
+        }
+
+        function resetVotes() {
+            if (!adminAuthenticated) {
+                alert('Admin authentication required');
+                return;
+            }
+            if (confirm('Are you sure you want to reset all votes? This cannot be undone.')) {
+                // Reset all vote counts to zero
+                votes.president.alice = 0;
+                votes.president.michael = 0;
+                votes.vp.bob = 0;
+                votes.vp.sarah = 0;
+                votes.vp.carol = 0;
+                
+                // Clear used codes and reset counters
+                usedCodes.clear();
+                totalVotersParticipated = 0;
+                totalVotesCast = 0;
+                
+                // Reset any user voting state
+                currentUser = null;
+                userVotes = { president: null, vp: null };
+                
+                // Update all displays
+                updateAdminDisplay();
+                updateResultsDisplay();
+                alert('All votes have been reset!');
+            }
+        }
+
+        function generateNewCodes() {
+            if (!adminAuthenticated) {
+                alert('Admin authentication required');
+                return;
+            }
+            
+            const newCodes = generateRandomCodes(MAX_VOTERS);
+            VALID_CODES = newCodes;
+            
+            // Clear used codes since we have new ones
+            usedCodes.clear();
+            
+            // Display codes in a more readable format
+            const codesDisplay = document.getElementById('generatedCodes');
+            const codesText = newCodes.map((code, index) => 
+                `${index + 1}. ${code}`
+            ).join('\n');
+            
+            codesDisplay.innerHTML = `<pre class="whitespace-pre-wrap">${codesText}</pre>`;
+            
+            // Update demo codes display if visible
+            updateDemoCodesDisplay();
+            
+            alert(`${newCodes.length} new secure access codes generated!`);
+        }
+
+        // Update demo codes display
+        function updateDemoCodesDisplay() {
+            const demoDisplay = document.getElementById('demoCodesDisplay');
+            if (demoDisplay && VALID_CODES.length > 0) {
+                const firstFive = VALID_CODES.slice(0, 5).join(', ');
+                const remaining = VALID_CODES.length > 5 ? VALID_CODES.slice(5, 10).join(', ') : '';
+                
+                demoDisplay.innerHTML = `
+                    <div>${firstFive}</div>
+                    ${remaining ? `<div>${remaining}</div>` : ''}
+                `;
+            }
+        }
+
+        // Initialize displays
+        updateResultsDisplay();
+        updateAdminDisplay();
+        updateDemoCodesDisplay();
+
+        // System starts with zero votes - all votes must be cast by real users
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97cf224720b973f4',t:'MTc1NzUwOTQ5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
